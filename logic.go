@@ -66,6 +66,15 @@ func move(state GameState) BattlesnakeMoveResponse {
 		"right": false,
 	}
 
+	lookDistance := map[string]int{
+		"up":    0,
+		"down":  0,
+		"left":  0,
+		"right": 0,
+	}
+
+	lookDistance = DetermineOpenSpaces(state, lookDistance)
+	fmt.Println("Look Distance:", lookDistance)
 	// Step 0: Don't let your Battlesnake move back in on it's own neck
 	possibleMoves = AvoidMyNeck(state, possibleMoves)
 
@@ -126,8 +135,8 @@ func move(state GameState) BattlesnakeMoveResponse {
 		}
 	}
 	// safeMoves should now have hazardMoves removed!
-	fmt.Println("safeMoves after haz reduction:", safeMoves)
-	fmt.Println("hazardMoves: ", hazardMoves)
+	//fmt.Println("safeMoves after haz reduction:", safeMoves)
+	//fmt.Println("hazardMoves: ", hazardMoves)
 
 	//fmt.Println("safeMoves:", safeMoves)
 

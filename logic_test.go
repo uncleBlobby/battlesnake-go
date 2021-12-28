@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -348,6 +349,46 @@ func TestSimpleHazardAvoidanceTwoDirections(t *testing.T) {
 		// Should NOT move left or up into hazard!
 		if (nextMove.Move == "left") || (nextMove.Move == "up") {
 			t.Errorf("snake moved %s into hazard", nextMove.Move)
+		}
+	}
+}
+
+func TestLookDistance(t *testing.T) {
+	fmt.Println("Look Distance Test")
+	// Arrange
+	me := Battlesnake{
+		Head:   Coord{X: 5, Y: 5},
+		Body:   []Coord{{X: 5, Y: 5}, {X: 4, Y: 5}, {X: 4, Y: 4}, {X: 5, Y: 4}, {X: 6, Y: 4}, {X: 6, Y: 5}},
+		Length: 6,
+	}
+	enemy1 := Battlesnake{
+		Head:   Coord{X: 5, Y: 8},
+		Body:   []Coord{{X: 5, Y: 8}, {X: 4, Y: 8}, {X: 3, Y: 8}},
+		Length: 3,
+	}
+
+	state := GameState{
+		Board: Board{
+			Width:   11,
+			Height:  11,
+			Food:    []Coord{{}},
+			Snakes:  []Battlesnake{me, enemy1},
+			Hazards: []Coord{{}},
+		},
+		You: me,
+	}
+	lookDistance := map[string]int{
+		"up":    0,
+		"down":  0,
+		"left":  0,
+		"right": 0,
+	}
+	for i := 0; i < 1000; i++ {
+		lookDistance := ResetLookDistance(lookDistance)
+		lookDistance = DetermineOpenSpaces(state, lookDistance)
+		fmt.Println("Look Distance: ", lookDistance)
+		if lookDistance["up"] < lookDistance["down"] {
+			t.Error("look distance not working properly ", lookDistance)
 		}
 	}
 }
