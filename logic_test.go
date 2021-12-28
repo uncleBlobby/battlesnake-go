@@ -57,7 +57,7 @@ func TestRightWallAvoidance(t *testing.T) {
 func TestLeftWallAvoidance(t *testing.T) {
 	// Arrange
 	me := Battlesnake{
-		// Length 3, facing right wall
+		// Length 3, facing left wall
 		Head: Coord{X: 0, Y: 5},
 		Body: []Coord{{X: 0, Y: 5}, {X: 0, Y: 4}, {X: 0, Y: 3}},
 	}
@@ -83,7 +83,7 @@ func TestLeftWallAvoidance(t *testing.T) {
 func TestBottomWallAvoidance(t *testing.T) {
 	// Arrange
 	me := Battlesnake{
-		// Length 3, facing right wall
+		// Length 3, facing bottom wall
 		Head: Coord{X: 5, Y: 0},
 		Body: []Coord{{X: 5, Y: 0}, {X: 5, Y: 1}, {X: 5, Y: 2}},
 	}
@@ -109,7 +109,7 @@ func TestBottomWallAvoidance(t *testing.T) {
 func TestTopWallAvoidance(t *testing.T) {
 	// Arrange
 	me := Battlesnake{
-		// Length 3, facing right wall
+		// Length 3, facing top wall
 		Head: Coord{X: 5, Y: 10},
 		Body: []Coord{{X: 5, Y: 10}, {X: 5, Y: 9}, {X: 5, Y: 8}},
 	}
@@ -128,6 +128,32 @@ func TestTopWallAvoidance(t *testing.T) {
 		// Assert never move up
 		if nextMove.Move == "up" {
 			t.Errorf("snake moved into the top wall, %s", nextMove.Move)
+		}
+	}
+}
+
+func TestSelfAvoidance(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		//Length 6, coiled up in a knot.
+		Head: Coord{X: 5, Y: 10},
+		Body: []Coord{{X: 5, Y: 5}, {X: 4, Y: 5}, {X: 4, Y: 4}, {X: 5, Y: 4}, {X: 6, Y: 4}, {X: 6, Y: 5}},
+	}
+	state := GameState{
+		Board: Board{
+			Width:  11,
+			Height: 11,
+			Snakes: []Battlesnake{me},
+		},
+		You: me,
+	}
+
+	// Act 1,000x
+	for i := 0; i < 1000; i++ {
+		nextMove := move(state)
+		// Never Move anywhere but up
+		if nextMove.Move != "up" {
+			t.Errorf("snake moved into itself, %s", nextMove.Move)
 		}
 	}
 }
