@@ -7,8 +7,36 @@ package main
 
 import (
 	"log"
+	"math"
 	"math/rand"
 )
+
+func findFoodDistances(food []Coord, myHead Coord) Food {
+
+	foodList := []Food{}
+	for i := 0; i < len(food); i++ {
+		var newFood Food
+		newFood.X = food[i].X
+		newFood.Y = food[i].Y
+		newFood.Distance.X = int(math.Abs(float64(food[i].X - myHead.X)))
+		newFood.Distance.Y = int(math.Abs(float64(food[i].Y - myHead.Y)))
+		newFood.Distance.Total = newFood.Distance.X + newFood.Distance.Y
+		foodList = append(foodList, newFood)
+	}
+
+	// sort food list so first member is closest
+	closestFood := foodList[0]
+	for i := 1; i < len(foodList); i++ {
+		if foodList[i].Distance.Total < closestFood.Distance.Total {
+			closestFood = foodList[i]
+		}
+	}
+
+	// can also return foodList (foodlist with distances)
+	// removed for the time being
+
+	return closestFood
+}
 
 // This function is called when you register your Battlesnake on play.battlesnake.com
 // See https://docs.battlesnake.com/guides/getting-started#step-4-register-your-battlesnake
@@ -48,6 +76,13 @@ func move(state GameState) BattlesnakeMoveResponse {
 		"down":  true,
 		"left":  true,
 		"right": true,
+	}
+
+	preferredMoves := map[string]bool{
+		"up":    false,
+		"down":  false,
+		"left":  false,
+		"right": false,
 	}
 
 	// Step 0: Don't let your Battlesnake move back in on it's own neck
@@ -122,10 +157,32 @@ func move(state GameState) BattlesnakeMoveResponse {
 	}
 	// TODO: Step 4 - Find food.
 	// Use information in GameState to seek out and find food.
+	if len(state.Board.Food) > 0 {
+		closestFood := findFoodDistances(state.Board.Food, myHead)
 
+		if closestFood.X < myHead.X {
+			preferredMoves["left"] = true
+		}
+		if closestFood.X > myHead.X {
+			preferredMoves["right"] = true
+		}
+		if closestFood.Y < myHead.Y {
+			preferredMoves["down"] = true
+		}
+		if closestFood.Y > myHead.Y {
+			preferredMoves["up"] = true
+		}
+	}
 	// Finally, choose a move from the available safe moves.
 	// TODO: Step 5 - Select a move to make based on strategy, rather than random.
 	var nextMove string
+
+	foodMoves := []string{}
+	for move, isPreferred := range preferredMoves {
+		if isPreferred {
+			foodMoves = append(foodMoves, move)
+		}
+	}
 
 	safeMoves := []string{}
 	for move, isSafe := range possibleMoves {
@@ -134,11 +191,24 @@ func move(state GameState) BattlesnakeMoveResponse {
 		}
 	}
 
+	safeMovesTowardFood := []string{}
+	for i := 0; i < len(safeMoves); i++ {
+		for j := 0; j < len(foodMoves); j++ {
+			if safeMoves[i] == foodMoves[j] {
+				safeMovesTowardFood = append(safeMovesTowardFood, foodMoves[j])
+			}
+		}
+	}
+
 	if len(safeMoves) == 0 {
 		nextMove = "down"
 		log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
 	} else {
-		nextMove = safeMoves[rand.Intn(len(safeMoves))]
+		if len(safeMovesTowardFood) > 0 {
+			nextMove = safeMoves[rand.Intn(len(safeMovesTowardFood))]
+		} else {
+			nextMove = safeMoves[rand.Intn(len(safeMoves))]
+		}
 		log.Printf("%s MOVE %d: %s\n", state.Game.ID, state.Turn, nextMove)
 	}
 	return BattlesnakeMoveResponse{

@@ -74,6 +74,18 @@ type Coord struct {
 	Y int `json:"y"`
 }
 
+type Food struct {
+	X        int      `json:"x"`
+	Y        int      `json:"y"`
+	Distance Distance `json:"distance"`
+}
+
+type Distance struct {
+	X     int `json:"x"`
+	Y     int `json:"y"`
+	Total int `json:"total"`
+}
+
 // Response Structs
 
 type BattlesnakeInfoResponse struct {

@@ -195,4 +195,36 @@ func TestOtherSnakeAvoidance(t *testing.T) {
 	}
 }
 
+func TestMovesTowardFood(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		Head:   Coord{X: 5, Y: 5},
+		Body:   []Coord{{X: 5, Y: 5}, {X: 5, Y: 4}, {X: 5, Y: 3}},
+		Length: 3,
+	}
+	state := GameState{
+		Board: Board{
+			Width:  11,
+			Height: 11,
+			Food:   []Coord{{X: 10, Y: 10}, {X: 9, Y: 9}},
+			Snakes: []Battlesnake{me},
+		},
+		You: me,
+	}
+
+	for i := 0; i < 1000; i++ {
+		nextMove := move(state)
+		// Should move Right or Up toward food!
+		if (nextMove.Move != "right") && (nextMove.Move != "up") {
+			t.Errorf("snake failed to move toward food, %s", nextMove.Move)
+		}
+	}
+	/*
+		nextMove := move(state)
+		if nextMove.Move != "up"  {
+			t.Errorf("snake failed to move toward food")
+		}
+	*/
+}
+
 // TODO: More GameState test cases!
