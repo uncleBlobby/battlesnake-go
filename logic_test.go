@@ -158,8 +158,8 @@ func TestSelfAvoidance(t *testing.T) {
 	}
 }
 
-func TestOtherSnakeAvoidance(t *testing.T) {
-	// Arrange
+func TestOtherSnakeAvoidance1(t *testing.T) {
+	// Two Snakes beside, neck to the south
 	me := Battlesnake{
 		//Length 3, middle of board next to other snakes
 		Head:   Coord{X: 5, Y: 5},
@@ -195,7 +195,44 @@ func TestOtherSnakeAvoidance(t *testing.T) {
 	}
 }
 
-func TestMovesTowardFood(t *testing.T) {
+func TestOtherSnakeAvoidance2(t *testing.T) {
+	// Two Snakes beside, neck to the north
+	me := Battlesnake{
+		//Length 3, middle of board next to other snakes
+		Head:   Coord{X: 5, Y: 5},
+		Body:   []Coord{{X: 5, Y: 5}, {X: 5, Y: 6}, {X: 5, Y: 7}},
+		Length: 3,
+	}
+	enemy1 := Battlesnake{
+		Head:   Coord{X: 4, Y: 5},
+		Body:   []Coord{{X: 4, Y: 5}, {X: 4, Y: 4}, {X: 4, Y: 3}},
+		Length: 3,
+	}
+	enemy2 := Battlesnake{
+		Head:   Coord{X: 6, Y: 5},
+		Body:   []Coord{{X: 6, Y: 5}, {X: 6, Y: 4}, {X: 6, Y: 3}},
+		Length: 3,
+	}
+	state := GameState{
+		Board: Board{
+			Width:  11,
+			Height: 11,
+			Snakes: []Battlesnake{me, enemy1, enemy2},
+		},
+		You: me,
+	}
+
+	// Act 1,000x
+	for i := 0; i < 1000; i++ {
+		nextMove := move(state)
+		// Don't move Left or Right into other snakes!
+		if nextMove.Move == "left" || nextMove.Move == "right" {
+			t.Errorf("snake moved into enemy, %s", nextMove.Move)
+		}
+	}
+}
+
+func TestMovesUpOrRightTowardFood(t *testing.T) {
 	// Arrange
 	me := Battlesnake{
 		Head:   Coord{X: 5, Y: 5},
@@ -219,12 +256,34 @@ func TestMovesTowardFood(t *testing.T) {
 			t.Errorf("snake failed to move toward food, %s", nextMove.Move)
 		}
 	}
-	/*
+
+}
+
+func TestMovesDownOrLeftTowardFood(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		Head:   Coord{X: 5, Y: 5},
+		Body:   []Coord{{X: 5, Y: 5}, {X: 5, Y: 4}, {X: 5, Y: 3}},
+		Length: 3,
+	}
+	state := GameState{
+		Board: Board{
+			Width:  11,
+			Height: 11,
+			Food:   []Coord{{X: 0, Y: 0}, {X: 1, Y: 1}},
+			Snakes: []Battlesnake{me},
+		},
+		You: me,
+	}
+
+	for i := 0; i < 1000; i++ {
 		nextMove := move(state)
-		if nextMove.Move != "up"  {
-			t.Errorf("snake failed to move toward food")
+		// Should move Right or Up toward food!
+		if (nextMove.Move != "down") && (nextMove.Move != "left") {
+			t.Errorf("snake failed to move toward food, %s", nextMove.Move)
 		}
-	*/
+	}
+
 }
 
 // TODO: More GameState test cases!
