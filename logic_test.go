@@ -386,7 +386,7 @@ func TestLookDistance(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		lookDistance := ResetLookDistance(lookDistance)
 		lookDistance = DetermineOpenSpaces(state, lookDistance)
-		fmt.Println("Look Distance: ", lookDistance)
+		//fmt.Println("Look Distance: ", lookDistance)
 		if lookDistance["up"] < lookDistance["down"] {
 			t.Error("look distance not working properly ", lookDistance)
 		}

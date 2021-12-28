@@ -8,7 +8,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 )
 
 // This function is called when you register your Battlesnake on play.battlesnake.com
@@ -74,7 +73,10 @@ func move(state GameState) BattlesnakeMoveResponse {
 	}
 
 	lookDistance = DetermineOpenSpaces(state, lookDistance)
-	fmt.Println("Look Distance:", lookDistance)
+	fmt.Println("Look Distance: ", lookDistance)
+	var largestLookDirection = ReturnLargestLookDistanceDirection(lookDistance)
+	fmt.Println("Largest Look Distance: ", largestLookDirection)
+
 	// Step 0: Don't let your Battlesnake move back in on it's own neck
 	possibleMoves = AvoidMyNeck(state, possibleMoves)
 
@@ -123,7 +125,7 @@ func move(state GameState) BattlesnakeMoveResponse {
 	}
 
 	// if safeMoves is greater in length than hazardMoves, remove hazardMoves from safeMoves
-	fmt.Println("safeMoves before haz reduction:", safeMoves)
+	//fmt.Println("safeMoves before haz reduction:", safeMoves)
 	if len(safeMoves) > len(hazardMoves) {
 		for i := 0; i < len(hazardMoves); i++ {
 			for j := 0; j < len(safeMoves); j++ {
@@ -151,19 +153,9 @@ func move(state GameState) BattlesnakeMoveResponse {
 
 	//fmt.Println("safeMovesTowardFood:", safeMovesTowardFood)
 	//fmt.Println("len(safeMovesTowardFood):", len(safeMovesTowardFood))
-	if len(safeMoves) == 0 {
-		nextMove = "down"
-		log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
-	} else {
-		if len(safeMovesTowardFood) > 0 {
-			//fmt.Println("Choosing safeMoveTowardFood!")
-			nextMove = safeMovesTowardFood[rand.Intn(len(safeMovesTowardFood))]
-		} else {
-			//fmt.Println("Choosing any safe move!")
-			nextMove = safeMoves[rand.Intn(len(safeMoves))]
-		}
-		log.Printf("%s MOVE %d: %s\n", state.Game.ID, state.Turn, nextMove)
-	}
+
+	nextMove = ReturnChosenMove(state, safeMoves, safeMovesTowardFood, largestLookDirection)
+
 	return BattlesnakeMoveResponse{
 		Move: nextMove,
 	}

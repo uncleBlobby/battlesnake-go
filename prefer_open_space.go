@@ -1,5 +1,21 @@
 package main
 
+import (
+	"fmt"
+	"sort"
+)
+
+type Pair struct {
+	Key   string
+	Value int
+}
+
+type PairList []Pair
+
+func (p PairList) Len() int           { return len(p) }
+func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p PairList) Less(i, j int) bool { return p[i].Value < p[j].Value }
+
 // look at each possible move direction
 // look from there to see how far you can see :)
 
@@ -41,7 +57,37 @@ func DetermineOpenSpaces(state GameState, lookDistance map[string]int) map[strin
 		}
 	}
 
+	p := make(PairList, len(lookDistance))
+	i := 0
+	for k, v := range lookDistance {
+		p[i] = Pair{k, v}
+		i++
+	}
+
+	sort.Sort(p)
+
+	for _, k := range p {
+		fmt.Printf("%v\t%v\n", k.Key, k.Value)
+	}
+
 	return lookDistance
+}
+
+func ReturnLargestLookDistanceDirection(lookDistance map[string]int) string {
+	p := make(PairList, len(lookDistance))
+	i := 0
+	for k, v := range lookDistance {
+		p[i] = Pair{k, v}
+		i++
+	}
+
+	sort.Sort(p)
+
+	for _, k := range p {
+		fmt.Printf("%v\t%v\n", k.Key, k.Value)
+	}
+
+	return p[3].Key
 }
 
 func checkAnyGivenCoordForSnakeBody(state GameState, target Coord) bool {
