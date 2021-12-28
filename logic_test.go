@@ -286,4 +286,70 @@ func TestMovesDownOrLeftTowardFood(t *testing.T) {
 
 }
 
+func TestSimpleHazardAvoidanceOneDirection(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		Head:   Coord{X: 1, Y: 5},
+		Body:   []Coord{{X: 1, Y: 5}, {X: 1, Y: 4}, {X: 1, Y: 3}},
+		Length: 3,
+	}
+	state := GameState{
+		Board: Board{
+			Width:  11,
+			Height: 11,
+			Food:   []Coord{{}},
+			Snakes: []Battlesnake{me},
+			Hazards: []Coord{
+				{X: 0, Y: 10}, {X: 0, Y: 9}, {X: 0, Y: 8},
+				{X: 0, Y: 7}, {X: 0, Y: 6}, {X: 0, Y: 5},
+				{X: 0, Y: 4}, {X: 0, Y: 3}, {X: 0, Y: 2},
+				{X: 0, Y: 1}},
+		},
+		You: me,
+	}
+
+	for i := 0; i < 1000; i++ {
+		nextMove := move(state)
+		// Should NOT move left into hazard!
+		if nextMove.Move == "left" {
+			t.Errorf("snake moved %s into hazard", nextMove.Move)
+		}
+	}
+}
+
+func TestSimpleHazardAvoidanceTwoDirections(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		Head:   Coord{X: 1, Y: 9},
+		Body:   []Coord{{X: 1, Y: 9}, {X: 1, Y: 8}, {X: 1, Y: 7}},
+		Length: 3,
+	}
+	state := GameState{
+		Board: Board{
+			Width:  11,
+			Height: 11,
+			Food:   []Coord{{}},
+			Snakes: []Battlesnake{me},
+			Hazards: []Coord{
+				{X: 0, Y: 10}, {X: 0, Y: 9}, {X: 0, Y: 8},
+				{X: 0, Y: 7}, {X: 0, Y: 6}, {X: 0, Y: 5},
+				{X: 0, Y: 4}, {X: 0, Y: 3}, {X: 0, Y: 2},
+				{X: 0, Y: 1},
+				{X: 1, Y: 10}, {X: 2, Y: 10}, {X: 3, Y: 10},
+				{X: 4, Y: 10}, {X: 5, Y: 10}, {X: 6, Y: 10},
+				{X: 7, Y: 10}, {X: 8, Y: 10}, {X: 9, Y: 10},
+				{X: 10, Y: 10}},
+		},
+		You: me,
+	}
+
+	for i := 0; i < 1000; i++ {
+		nextMove := move(state)
+		// Should NOT move left or up into hazard!
+		if (nextMove.Move == "left") || (nextMove.Move == "up") {
+			t.Errorf("snake moved %s into hazard", nextMove.Move)
+		}
+	}
+}
+
 // TODO: More GameState test cases!

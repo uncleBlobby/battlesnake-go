@@ -6,6 +6,7 @@ package main
 // from the list of possible moves!
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -79,6 +80,13 @@ func move(state GameState) BattlesnakeMoveResponse {
 	}
 
 	preferredMoves := map[string]bool{
+		"up":    false,
+		"down":  false,
+		"left":  false,
+		"right": false,
+	}
+
+	dangerMoves := map[string]bool{
 		"up":    false,
 		"down":  false,
 		"left":  false,
@@ -174,9 +182,35 @@ func move(state GameState) BattlesnakeMoveResponse {
 		}
 		//fmt.Println("Preferred Moves:", preferredMoves)
 	}
+
+	// TODO: avoid hazard sauce when possible!
+	hazards := state.Board.Hazards
+	if len(hazards) > 0 {
+		for i := 0; i < len(hazards); i++ {
+			if (myHead.X-1 == hazards[i].X) && (myHead.Y == hazards[i].Y) {
+				dangerMoves["left"] = true
+			}
+			if (myHead.X+1 == hazards[i].X) && (myHead.Y == hazards[i].Y) {
+				dangerMoves["right"] = true
+			}
+			if (myHead.X == hazards[i].X) && (myHead.Y-1 == hazards[i].Y) {
+				dangerMoves["down"] = true
+			}
+			if (myHead.X == hazards[i].X) && (myHead.Y+1 == hazards[i].Y) {
+				dangerMoves["up"] = true
+			}
+		}
+	}
 	// Finally, choose a move from the available safe moves.
 	// TODO: Step 5 - Select a move to make based on strategy, rather than random.
 	var nextMove string
+
+	hazardMoves := []string{}
+	for move, isDangerous := range dangerMoves {
+		if isDangerous {
+			hazardMoves = append(hazardMoves, move)
+		}
+	}
 
 	foodMoves := []string{}
 	for move, isPreferred := range preferredMoves {
@@ -193,6 +227,24 @@ func move(state GameState) BattlesnakeMoveResponse {
 			safeMoves = append(safeMoves, move)
 		}
 	}
+
+	// if safeMoves is greater in length than hazardMoves, remove hazardMoves from safeMoves
+	fmt.Println("safeMoves before haz reduction:", safeMoves)
+	if len(safeMoves) > len(hazardMoves) {
+		for i := 0; i < len(hazardMoves); i++ {
+			for j := 0; j < len(safeMoves); j++ {
+				if safeMoves[j] == hazardMoves[i] {
+					safeMoves = append(safeMoves[:j], safeMoves[j+1:]...)
+					//safeMoves[i] = safeMoves[len(safeMoves)-1]
+					//safeMoves = safeMoves[:i+copy(safeMoves[i:], safeMoves[i+1:])]
+					//safeMoves = append(safeMoves[:i], safeMoves[:j]...)
+				}
+			}
+		}
+	}
+	// safeMoves should now have hazardMoves removed!
+	fmt.Println("safeMoves after haz reduction:", safeMoves)
+	fmt.Println("hazardMoves: ", hazardMoves)
 
 	//fmt.Println("safeMoves:", safeMoves)
 
