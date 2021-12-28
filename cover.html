@@ -1,0 +1,558 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>starter-snake-go: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/BattlesnakeOfficial/starter-snake-go/logic.go (92.3%)</option>
+				
+				<option value="file1">github.com/BattlesnakeOfficial/starter-snake-go/main.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+// This file can be a nice home for your Battlesnake logic and related helper functions.
+//
+// We have started this for you, with a function to help remove the 'neck' direction
+// from the list of possible moves!
+
+import (
+        "fmt"
+        "log"
+        "math"
+        "math/rand"
+)
+
+func findFoodDistances(food []Coord, myHead Coord) Food <span class="cov8" title="1">{
+
+        foodList := []Food{}
+        for i := 0; i &lt; len(food); i++ </span><span class="cov8" title="1">{
+                var newFood Food
+                newFood.X = food[i].X
+                newFood.Y = food[i].Y
+                newFood.Distance.X = int(math.Abs(float64(food[i].X - myHead.X)))
+                newFood.Distance.Y = int(math.Abs(float64(food[i].Y - myHead.Y)))
+                newFood.Distance.Total = newFood.Distance.X + newFood.Distance.Y
+                foodList = append(foodList, newFood)
+        }</span>
+
+        // sort food list so first member is closest
+        <span class="cov8" title="1">closestFood := foodList[0]
+        for i := 1; i &lt; len(foodList); i++ </span><span class="cov8" title="1">{
+                if foodList[i].Distance.Total &lt; closestFood.Distance.Total </span><span class="cov8" title="1">{
+                        closestFood = foodList[i]
+                }</span>
+        }
+
+        // can also return foodList (foodlist with distances)
+        // removed for the time being
+
+        <span class="cov8" title="1">return closestFood</span>
+}
+
+// This function is called when you register your Battlesnake on play.battlesnake.com
+// See https://docs.battlesnake.com/guides/getting-started#step-4-register-your-battlesnake
+// It controls your Battlesnake appearance and author permissions.
+// For customization options, see https://docs.battlesnake.com/references/personalization
+// TIP: If you open your Battlesnake URL in browser you should see this data.
+func info() BattlesnakeInfoResponse <span class="cov0" title="0">{
+        log.Println("INFO")
+        return BattlesnakeInfoResponse{
+                APIVersion: "1",
+                Author:     "uncleBlobby", // TODO: Your Battlesnake username
+                Color:      "#888888",     // TODO: Personalize
+                Head:       "default",     // TODO: Personalize
+                Tail:       "default",     // TODO: Personalize
+        }
+}</span>
+
+// This function is called everytime your Battlesnake is entered into a game.
+// The provided GameState contains information about the game that's about to be played.
+// It's purely for informational purposes, you don't have to make any decisions here.
+func start(state GameState) <span class="cov0" title="0">{
+        log.Printf("%s START\n", state.Game.ID)
+}</span>
+
+// This function is called when a game your Battlesnake was in has ended.
+// It's purely for informational purposes, you don't have to make any decisions here.
+func end(state GameState) <span class="cov0" title="0">{
+        log.Printf("%s END\n\n", state.Game.ID)
+}</span>
+
+// This function is called on every turn of a game. Use the provided GameState to decide
+// where to move -- valid moves are "up", "down", "left", or "right".
+// We've provided some code and comments to get you started.
+func move(state GameState) BattlesnakeMoveResponse <span class="cov8" title="1">{
+        possibleMoves := map[string]bool{
+                "up":    true,
+                "down":  true,
+                "left":  true,
+                "right": true,
+        }
+
+        preferredMoves := map[string]bool{
+                "up":    false,
+                "down":  false,
+                "left":  false,
+                "right": false,
+        }
+
+        dangerMoves := map[string]bool{
+                "up":    false,
+                "down":  false,
+                "left":  false,
+                "right": false,
+        }
+
+        // Step 0: Don't let your Battlesnake move back in on it's own neck
+        myHead := state.You.Body[0] // Coordinates of your head
+        myNeck := state.You.Body[1] // Coordinates of body piece directly behind your head (your "neck")
+        if myNeck.X &lt; myHead.X </span><span class="cov8" title="1">{
+                possibleMoves["left"] = false
+        }</span> else<span class="cov8" title="1"> if myNeck.X &gt; myHead.X </span><span class="cov0" title="0">{
+                possibleMoves["right"] = false
+        }</span> else<span class="cov8" title="1"> if myNeck.Y &lt; myHead.Y </span><span class="cov8" title="1">{
+                possibleMoves["down"] = false
+        }</span> else<span class="cov8" title="1"> if myNeck.Y &gt; myHead.Y </span><span class="cov8" title="1">{
+                possibleMoves["up"] = false
+        }</span>
+
+        // TODO: Step 1 - Don't hit walls.
+        // Use information in GameState to prevent your Battlesnake from moving beyond the boundaries of the board.
+        <span class="cov8" title="1">boardWidth := state.Board.Width
+        boardHeight := state.Board.Height
+
+        if myHead.X == 0 </span><span class="cov8" title="1">{
+                possibleMoves["left"] = false
+        }</span>
+        <span class="cov8" title="1">if myHead.X == boardWidth-1 </span><span class="cov8" title="1">{
+                possibleMoves["right"] = false
+        }</span>
+        <span class="cov8" title="1">if myHead.Y == 0 </span><span class="cov8" title="1">{
+                possibleMoves["down"] = false
+        }</span>
+        <span class="cov8" title="1">if myHead.Y == boardHeight-1 </span><span class="cov8" title="1">{
+                possibleMoves["up"] = false
+        }</span>
+
+        // TODO: Step 2 - Don't hit yourself.
+        // Use information in GameState to prevent your Battlesnake from colliding with itself.
+        <span class="cov8" title="1">myBody := state.You.Body
+
+        for i := 0; i &lt; len(myBody); i++ </span><span class="cov8" title="1">{
+                if myHead.X-1 == myBody[i].X &amp;&amp; myHead.Y == myBody[i].Y </span><span class="cov8" title="1">{
+                        possibleMoves["left"] = false
+                }</span>
+                <span class="cov8" title="1">if myHead.X+1 == myBody[i].X &amp;&amp; myHead.Y == myBody[i].Y </span><span class="cov8" title="1">{
+                        possibleMoves["right"] = false
+                }</span>
+                <span class="cov8" title="1">if myHead.X == myBody[i].X &amp;&amp; myHead.Y-1 == myBody[i].Y </span><span class="cov8" title="1">{
+                        possibleMoves["down"] = false
+                }</span>
+                <span class="cov8" title="1">if myHead.X == myBody[i].X &amp;&amp; myHead.Y+1 == myBody[i].Y </span><span class="cov8" title="1">{
+                        possibleMoves["up"] = false
+                }</span>
+        }
+
+        // TODO: Step 3 - Don't collide with others.
+        // Use information in GameState to prevent your Battlesnake from colliding with others.
+        <span class="cov8" title="1">snakes := state.Board.Snakes
+
+        for i := 0; i &lt; len(snakes); i++ </span><span class="cov8" title="1">{
+                for j := 0; j &lt; int(snakes[i].Length); j++ </span><span class="cov8" title="1">{
+                        if (myHead.X-1 == snakes[i].Body[j].X) &amp;&amp; (myHead.Y == snakes[i].Body[j].Y) </span><span class="cov8" title="1">{
+                                possibleMoves["left"] = false
+                        }</span>
+                        <span class="cov8" title="1">if (myHead.X+1 == snakes[i].Body[j].X) &amp;&amp; (myHead.Y == snakes[i].Body[j].Y) </span><span class="cov8" title="1">{
+                                possibleMoves["right"] = false
+                        }</span>
+                        <span class="cov8" title="1">if (myHead.X == snakes[i].Body[j].X) &amp;&amp; (myHead.Y-1 == snakes[i].Body[j].Y) </span><span class="cov8" title="1">{
+                                possibleMoves["down"] = false
+                        }</span>
+                        <span class="cov8" title="1">if (myHead.X == snakes[i].Body[j].X) &amp;&amp; (myHead.Y+1 == snakes[i].Body[j].Y) </span><span class="cov8" title="1">{
+                                possibleMoves["up"] = false
+                        }</span>
+                }
+        }
+        // TODO: Step 4 - Find food.
+        // Use information in GameState to seek out and find food.
+        <span class="cov8" title="1">if len(state.Board.Food) &gt; 0 </span><span class="cov8" title="1">{
+                closestFood := findFoodDistances(state.Board.Food, myHead)
+                //fmt.Println("Closest Food:", closestFood)
+                if closestFood.X &lt; myHead.X </span><span class="cov8" title="1">{
+                        preferredMoves["left"] = true
+                }</span>
+                <span class="cov8" title="1">if closestFood.X &gt; myHead.X </span><span class="cov8" title="1">{
+                        preferredMoves["right"] = true
+                }</span>
+                <span class="cov8" title="1">if closestFood.Y &lt; myHead.Y </span><span class="cov8" title="1">{
+                        preferredMoves["down"] = true
+                }</span>
+                <span class="cov8" title="1">if closestFood.Y &gt; myHead.Y </span><span class="cov8" title="1">{
+                        preferredMoves["up"] = true
+                }</span>
+                //fmt.Println("Preferred Moves:", preferredMoves)
+        }
+
+        // TODO: avoid hazard sauce when possible!
+        <span class="cov8" title="1">hazards := state.Board.Hazards
+        if len(hazards) &gt; 0 </span><span class="cov8" title="1">{
+                for i := 0; i &lt; len(hazards); i++ </span><span class="cov8" title="1">{
+                        if (myHead.X-1 == hazards[i].X) &amp;&amp; (myHead.Y == hazards[i].Y) </span><span class="cov8" title="1">{
+                                dangerMoves["left"] = true
+                        }</span>
+                        <span class="cov8" title="1">if (myHead.X+1 == hazards[i].X) &amp;&amp; (myHead.Y == hazards[i].Y) </span><span class="cov0" title="0">{
+                                dangerMoves["right"] = true
+                        }</span>
+                        <span class="cov8" title="1">if (myHead.X == hazards[i].X) &amp;&amp; (myHead.Y-1 == hazards[i].Y) </span><span class="cov0" title="0">{
+                                dangerMoves["down"] = true
+                        }</span>
+                        <span class="cov8" title="1">if (myHead.X == hazards[i].X) &amp;&amp; (myHead.Y+1 == hazards[i].Y) </span><span class="cov8" title="1">{
+                                dangerMoves["up"] = true
+                        }</span>
+                }
+        }
+        // Finally, choose a move from the available safe moves.
+        // TODO: Step 5 - Select a move to make based on strategy, rather than random.
+        <span class="cov8" title="1">var nextMove string
+
+        hazardMoves := []string{}
+        for move, isDangerous := range dangerMoves </span><span class="cov8" title="1">{
+                if isDangerous </span><span class="cov8" title="1">{
+                        hazardMoves = append(hazardMoves, move)
+                }</span>
+        }
+
+        <span class="cov8" title="1">foodMoves := []string{}
+        for move, isPreferred := range preferredMoves </span><span class="cov8" title="1">{
+                if isPreferred </span><span class="cov8" title="1">{
+                        foodMoves = append(foodMoves, move)
+                }</span>
+        }
+
+        //fmt.Println("foodMoves:", foodMoves)
+
+        <span class="cov8" title="1">safeMoves := []string{}
+        for move, isSafe := range possibleMoves </span><span class="cov8" title="1">{
+                if isSafe </span><span class="cov8" title="1">{
+                        safeMoves = append(safeMoves, move)
+                }</span>
+        }
+
+        // if safeMoves is greater in length than hazardMoves, remove hazardMoves from safeMoves
+        <span class="cov8" title="1">fmt.Println("safeMoves before haz reduction:", safeMoves)
+        if len(safeMoves) &gt; len(hazardMoves) </span><span class="cov8" title="1">{
+                for i := 0; i &lt; len(hazardMoves); i++ </span><span class="cov8" title="1">{
+                        for j := 0; j &lt; len(safeMoves); j++ </span><span class="cov8" title="1">{
+                                if safeMoves[j] == hazardMoves[i] </span><span class="cov8" title="1">{
+                                        safeMoves = append(safeMoves[:j], safeMoves[j+1:]...)
+
+                                }</span>
+                        }
+                }
+        }
+        // safeMoves should now have hazardMoves removed!
+        <span class="cov8" title="1">fmt.Println("safeMoves after haz reduction:", safeMoves)
+        fmt.Println("hazardMoves: ", hazardMoves)
+
+        //fmt.Println("safeMoves:", safeMoves)
+
+        safeMovesTowardFood := []string{}
+        for i := 0; i &lt; len(safeMoves); i++ </span><span class="cov8" title="1">{
+                for j := 0; j &lt; len(foodMoves); j++ </span><span class="cov8" title="1">{
+                        if safeMoves[i] == foodMoves[j] </span><span class="cov8" title="1">{
+                                safeMovesTowardFood = append(safeMovesTowardFood, foodMoves[j])
+                        }</span>
+                }
+        }
+
+        //fmt.Println("safeMovesTowardFood:", safeMovesTowardFood)
+        //fmt.Println("len(safeMovesTowardFood):", len(safeMovesTowardFood))
+        <span class="cov8" title="1">if len(safeMoves) == 0 </span><span class="cov0" title="0">{
+                nextMove = "down"
+                log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
+        }</span> else<span class="cov8" title="1"> {
+                if len(safeMovesTowardFood) &gt; 0 </span><span class="cov8" title="1">{
+                        //fmt.Println("Choosing safeMoveTowardFood!")
+                        nextMove = safeMovesTowardFood[rand.Intn(len(safeMovesTowardFood))]
+                }</span> else<span class="cov8" title="1"> {
+                        //fmt.Println("Choosing any safe move!")
+                        nextMove = safeMoves[rand.Intn(len(safeMoves))]
+                }</span>
+                <span class="cov8" title="1">log.Printf("%s MOVE %d: %s\n", state.Game.ID, state.Turn, nextMove)</span>
+        }
+        <span class="cov8" title="1">return BattlesnakeMoveResponse{
+                Move: nextMove,
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "encoding/json"
+        "log"
+        "net/http"
+        "os"
+)
+
+type GameState struct {
+        Game  Game        `json:"game"`
+        Turn  int         `json:"turn"`
+        Board Board       `json:"board"`
+        You   Battlesnake `json:"you"`
+}
+
+type Game struct {
+        ID      string  `json:"id"`
+        Ruleset Ruleset `json:"ruleset"`
+        Timeout int32   `json:"timeout"`
+}
+
+type Ruleset struct {
+        Name     string   `json:"name"`
+        Version  string   `json:"version"`
+        Settings Settings `json:"settings"`
+}
+
+type Settings struct {
+        FoodSpawnChance     int32  `json:"foodSpawnChance"`
+        MinimumFood         int32  `json:"minimumFood"`
+        HazardDamagePerTurn int32  `json:"hazardDamagePerTurn"`
+        Royale              Royale `json:"royale"`
+        Squad               Squad  `json:"squad"`
+}
+
+type Royale struct {
+        ShrinkEveryNTurns int32 `json:"shrinkEveryNTurns"`
+}
+
+type Squad struct {
+        AllowBodyCollisions bool `json:"allowBodyCollisions"`
+        SharedElimination   bool `json:"sharedElimination"`
+        SharedHealth        bool `json:"sharedHealth"`
+        SharedLength        bool `json:"sharedLength"`
+}
+
+type Board struct {
+        Height int           `json:"height"`
+        Width  int           `json:"width"`
+        Food   []Coord       `json:"food"`
+        Snakes []Battlesnake `json:"snakes"`
+
+        // Used in non-standard game modes
+        Hazards []Coord `json:"hazards"`
+}
+
+type Battlesnake struct {
+        ID      string  `json:"id"`
+        Name    string  `json:"name"`
+        Health  int32   `json:"health"`
+        Body    []Coord `json:"body"`
+        Head    Coord   `json:"head"`
+        Length  int32   `json:"length"`
+        Latency string  `json:"latency"`
+
+        // Used in non-standard game modes
+        Shout string `json:"shout"`
+        Squad string `json:"squad"`
+}
+
+type Coord struct {
+        X int `json:"x"`
+        Y int `json:"y"`
+}
+
+type Food struct {
+        X        int      `json:"x"`
+        Y        int      `json:"y"`
+        Distance Distance `json:"distance"`
+}
+
+type Distance struct {
+        X     int `json:"x"`
+        Y     int `json:"y"`
+        Total int `json:"total"`
+}
+
+// Response Structs
+
+type BattlesnakeInfoResponse struct {
+        APIVersion string `json:"apiversion"`
+        Author     string `json:"author"`
+        Color      string `json:"color"`
+        Head       string `json:"head"`
+        Tail       string `json:"tail"`
+}
+
+type BattlesnakeMoveResponse struct {
+        Move  string `json:"move"`
+        Shout string `json:"shout,omitempty"`
+}
+
+// HTTP Handlers
+
+func HandleIndex(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        response := info()
+
+        w.Header().Set("Content-Type", "application/json")
+        err := json.NewEncoder(w).Encode(response)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("ERROR: Failed to encode info response, %s", err)
+        }</span>
+}
+
+func HandleStart(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        state := GameState{}
+        err := json.NewDecoder(r.Body).Decode(&amp;state)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("ERROR: Failed to decode start json, %s", err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">start(state)</span>
+
+        // Nothing to respond with here
+}
+
+func HandleMove(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        state := GameState{}
+        err := json.NewDecoder(r.Body).Decode(&amp;state)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("ERROR: Failed to decode move json, %s", err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">response := move(state)
+
+        w.Header().Set("Content-Type", "application/json")
+        err = json.NewEncoder(w).Encode(response)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("ERROR: Failed to encode move response, %s", err)
+                return
+        }</span>
+}
+
+func HandleEnd(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        state := GameState{}
+        err := json.NewDecoder(r.Body).Decode(&amp;state)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("ERROR: Failed to decode end json, %s", err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">end(state)</span>
+
+        // Nothing to respond with here
+}
+
+// Main Entrypoint
+
+func main() <span class="cov0" title="0">{
+        port := os.Getenv("PORT")
+        if len(port) == 0 </span><span class="cov0" title="0">{
+                port = "8080"
+        }</span>
+
+        <span class="cov0" title="0">http.HandleFunc("/", HandleIndex)
+        http.HandleFunc("/start", HandleStart)
+        http.HandleFunc("/move", HandleMove)
+        http.HandleFunc("/end", HandleEnd)
+
+        log.Printf("Starting Battlesnake Server at http://0.0.0.0:%s...\n", port)
+        log.Fatal(http.ListenAndServe(":"+port, nil))</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
