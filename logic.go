@@ -159,7 +159,7 @@ func move(state GameState) BattlesnakeMoveResponse {
 	// Use information in GameState to seek out and find food.
 	if len(state.Board.Food) > 0 {
 		closestFood := findFoodDistances(state.Board.Food, myHead)
-
+		//fmt.Println("Closest Food:", closestFood)
 		if closestFood.X < myHead.X {
 			preferredMoves["left"] = true
 		}
@@ -172,6 +172,7 @@ func move(state GameState) BattlesnakeMoveResponse {
 		if closestFood.Y > myHead.Y {
 			preferredMoves["up"] = true
 		}
+		//fmt.Println("Preferred Moves:", preferredMoves)
 	}
 	// Finally, choose a move from the available safe moves.
 	// TODO: Step 5 - Select a move to make based on strategy, rather than random.
@@ -184,12 +185,16 @@ func move(state GameState) BattlesnakeMoveResponse {
 		}
 	}
 
+	//fmt.Println("foodMoves:", foodMoves)
+
 	safeMoves := []string{}
 	for move, isSafe := range possibleMoves {
 		if isSafe {
 			safeMoves = append(safeMoves, move)
 		}
 	}
+
+	//fmt.Println("safeMoves:", safeMoves)
 
 	safeMovesTowardFood := []string{}
 	for i := 0; i < len(safeMoves); i++ {
@@ -200,13 +205,17 @@ func move(state GameState) BattlesnakeMoveResponse {
 		}
 	}
 
+	//fmt.Println("safeMovesTowardFood:", safeMovesTowardFood)
+	//fmt.Println("len(safeMovesTowardFood):", len(safeMovesTowardFood))
 	if len(safeMoves) == 0 {
 		nextMove = "down"
 		log.Printf("%s MOVE %d: No safe moves detected! Moving %s\n", state.Game.ID, state.Turn, nextMove)
 	} else {
 		if len(safeMovesTowardFood) > 0 {
-			nextMove = safeMoves[rand.Intn(len(safeMovesTowardFood))]
+			//fmt.Println("Choosing safeMoveTowardFood!")
+			nextMove = safeMovesTowardFood[rand.Intn(len(safeMovesTowardFood))]
 		} else {
+			//fmt.Println("Choosing any safe move!")
 			nextMove = safeMoves[rand.Intn(len(safeMoves))]
 		}
 		log.Printf("%s MOVE %d: %s\n", state.Game.ID, state.Turn, nextMove)
