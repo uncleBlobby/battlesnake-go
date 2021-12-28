@@ -136,7 +136,7 @@ func TestSelfAvoidance(t *testing.T) {
 	// Arrange
 	me := Battlesnake{
 		//Length 6, coiled up in a knot.
-		Head: Coord{X: 5, Y: 10},
+		Head: Coord{X: 5, Y: 5},
 		Body: []Coord{{X: 5, Y: 5}, {X: 4, Y: 5}, {X: 4, Y: 4}, {X: 5, Y: 4}, {X: 6, Y: 4}, {X: 6, Y: 5}},
 	}
 	state := GameState{
@@ -154,6 +154,43 @@ func TestSelfAvoidance(t *testing.T) {
 		// Never Move anywhere but up
 		if nextMove.Move != "up" {
 			t.Errorf("snake moved into itself, %s", nextMove.Move)
+		}
+	}
+}
+
+func TestOtherSnakeAvoidance(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		//Length 3, middle of board next to other snakes
+		Head:   Coord{X: 5, Y: 5},
+		Body:   []Coord{{X: 5, Y: 5}, {X: 5, Y: 4}, {X: 5, Y: 3}},
+		Length: 3,
+	}
+	enemy1 := Battlesnake{
+		Head:   Coord{X: 4, Y: 5},
+		Body:   []Coord{{X: 4, Y: 5}, {X: 4, Y: 4}, {X: 4, Y: 3}},
+		Length: 3,
+	}
+	enemy2 := Battlesnake{
+		Head:   Coord{X: 6, Y: 5},
+		Body:   []Coord{{X: 6, Y: 5}, {X: 6, Y: 4}, {X: 6, Y: 3}},
+		Length: 3,
+	}
+	state := GameState{
+		Board: Board{
+			Width:  11,
+			Height: 11,
+			Snakes: []Battlesnake{me, enemy1, enemy2},
+		},
+		You: me,
+	}
+
+	// Act 1,000x
+	for i := 0; i < 1000; i++ {
+		nextMove := move(state)
+		// Don't move Left or Right into other snakes!
+		if nextMove.Move == "left" || nextMove.Move == "right" {
+			t.Errorf("snake moved into enemy, %s", nextMove.Move)
 		}
 	}
 }
