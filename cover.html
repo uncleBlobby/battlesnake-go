@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/BattlesnakeOfficial/starter-snake-go/logic.go (92.5%)</option>
+				<option value="file0">github.com/BattlesnakeOfficial/starter-snake-go/logic.go (92.3%)</option>
 				
 				<option value="file1">github.com/BattlesnakeOfficial/starter-snake-go/main.go (0.0%)</option>
 				
@@ -79,6 +79,7 @@
 // from the list of possible moves!
 
 import (
+        "fmt"
         "log"
         "math"
         "math/rand"
@@ -152,6 +153,13 @@ func move(state GameState) BattlesnakeMoveResponse <span class="cov8" title="1">
         }
 
         preferredMoves := map[string]bool{
+                "up":    false,
+                "down":  false,
+                "left":  false,
+                "right": false,
+        }
+
+        dangerMoves := map[string]bool{
                 "up":    false,
                 "down":  false,
                 "left":  false,
@@ -247,11 +255,37 @@ func move(state GameState) BattlesnakeMoveResponse <span class="cov8" title="1">
                 }</span>
                 //fmt.Println("Preferred Moves:", preferredMoves)
         }
+
+        // TODO: avoid hazard sauce when possible!
+        <span class="cov8" title="1">hazards := state.Board.Hazards
+        if len(hazards) &gt; 0 </span><span class="cov8" title="1">{
+                for i := 0; i &lt; len(hazards); i++ </span><span class="cov8" title="1">{
+                        if (myHead.X-1 == hazards[i].X) &amp;&amp; (myHead.Y == hazards[i].Y) </span><span class="cov8" title="1">{
+                                dangerMoves["left"] = true
+                        }</span>
+                        <span class="cov8" title="1">if (myHead.X+1 == hazards[i].X) &amp;&amp; (myHead.Y == hazards[i].Y) </span><span class="cov0" title="0">{
+                                dangerMoves["right"] = true
+                        }</span>
+                        <span class="cov8" title="1">if (myHead.X == hazards[i].X) &amp;&amp; (myHead.Y-1 == hazards[i].Y) </span><span class="cov0" title="0">{
+                                dangerMoves["down"] = true
+                        }</span>
+                        <span class="cov8" title="1">if (myHead.X == hazards[i].X) &amp;&amp; (myHead.Y+1 == hazards[i].Y) </span><span class="cov8" title="1">{
+                                dangerMoves["up"] = true
+                        }</span>
+                }
+        }
         // Finally, choose a move from the available safe moves.
         // TODO: Step 5 - Select a move to make based on strategy, rather than random.
         <span class="cov8" title="1">var nextMove string
 
-        foodMoves := []string{}
+        hazardMoves := []string{}
+        for move, isDangerous := range dangerMoves </span><span class="cov8" title="1">{
+                if isDangerous </span><span class="cov8" title="1">{
+                        hazardMoves = append(hazardMoves, move)
+                }</span>
+        }
+
+        <span class="cov8" title="1">foodMoves := []string{}
         for move, isPreferred := range preferredMoves </span><span class="cov8" title="1">{
                 if isPreferred </span><span class="cov8" title="1">{
                         foodMoves = append(foodMoves, move)
@@ -267,9 +301,25 @@ func move(state GameState) BattlesnakeMoveResponse <span class="cov8" title="1">
                 }</span>
         }
 
+        // if safeMoves is greater in length than hazardMoves, remove hazardMoves from safeMoves
+        <span class="cov8" title="1">fmt.Println("safeMoves before haz reduction:", safeMoves)
+        if len(safeMoves) &gt; len(hazardMoves) </span><span class="cov8" title="1">{
+                for i := 0; i &lt; len(hazardMoves); i++ </span><span class="cov8" title="1">{
+                        for j := 0; j &lt; len(safeMoves); j++ </span><span class="cov8" title="1">{
+                                if safeMoves[j] == hazardMoves[i] </span><span class="cov8" title="1">{
+                                        safeMoves = append(safeMoves[:j], safeMoves[j+1:]...)
+
+                                }</span>
+                        }
+                }
+        }
+        // safeMoves should now have hazardMoves removed!
+        <span class="cov8" title="1">fmt.Println("safeMoves after haz reduction:", safeMoves)
+        fmt.Println("hazardMoves: ", hazardMoves)
+
         //fmt.Println("safeMoves:", safeMoves)
 
-        <span class="cov8" title="1">safeMovesTowardFood := []string{}
+        safeMovesTowardFood := []string{}
         for i := 0; i &lt; len(safeMoves); i++ </span><span class="cov8" title="1">{
                 for j := 0; j &lt; len(foodMoves); j++ </span><span class="cov8" title="1">{
                         if safeMoves[i] == foodMoves[j] </span><span class="cov8" title="1">{

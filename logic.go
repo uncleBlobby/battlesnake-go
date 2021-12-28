@@ -235,9 +235,7 @@ func move(state GameState) BattlesnakeMoveResponse {
 			for j := 0; j < len(safeMoves); j++ {
 				if safeMoves[j] == hazardMoves[i] {
 					safeMoves = append(safeMoves[:j], safeMoves[j+1:]...)
-					//safeMoves[i] = safeMoves[len(safeMoves)-1]
-					//safeMoves = safeMoves[:i+copy(safeMoves[i:], safeMoves[i+1:])]
-					//safeMoves = append(safeMoves[:i], safeMoves[:j]...)
+
 				}
 			}
 		}
