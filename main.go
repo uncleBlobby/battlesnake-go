@@ -94,6 +94,7 @@ type BattlesnakeInfoResponse struct {
 	Color      string `json:"color"`
 	Head       string `json:"head"`
 	Tail       string `json:"tail"`
+	Version    string `json:"version"`
 }
 
 type BattlesnakeMoveResponse struct {
@@ -162,7 +163,7 @@ func HandleEnd(w http.ResponseWriter, r *http.Request) {
 func main() {
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
-		port = "8080"
+		port = "6969"
 	}
 
 	http.HandleFunc("/", HandleIndex)
