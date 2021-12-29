@@ -354,7 +354,7 @@ func TestSimpleHazardAvoidanceTwoDirections(t *testing.T) {
 }
 
 func TestLookDistance(t *testing.T) {
-	fmt.Println("Look Distance Test")
+	//fmt.Println("Look Distance Test")
 	// Arrange
 	me := Battlesnake{
 		Head:   Coord{X: 5, Y: 5},
@@ -390,6 +390,121 @@ func TestLookDistance(t *testing.T) {
 		if lookDistance["up"] < lookDistance["down"] {
 			t.Error("look distance not working properly ", lookDistance)
 		}
+	}
+}
+
+func TestEnemySnakeFinder(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		Head:   Coord{X: 5, Y: 5},
+		Body:   []Coord{{X: 5, Y: 5}, {X: 4, Y: 5}, {X: 4, Y: 4}, {X: 5, Y: 4}, {X: 6, Y: 4}, {X: 6, Y: 5}},
+		Length: 6,
+		ID:     "34252345-23452345",
+	}
+	enemy1 := Battlesnake{
+		Head:   Coord{X: 5, Y: 8},
+		Body:   []Coord{{X: 5, Y: 8}, {X: 4, Y: 8}, {X: 3, Y: 8}},
+		Length: 3,
+		ID:     "4326-6456456",
+	}
+
+	state := GameState{
+		Board: Board{
+			Width:   11,
+			Height:  11,
+			Food:    []Coord{{}},
+			Snakes:  []Battlesnake{me, enemy1},
+			Hazards: []Coord{{}},
+		},
+		You: me,
+	}
+
+	for i := 0; i < 1000; i++ {
+		enemySnakes := FindEnemySnakes(state)
+		if len(enemySnakes) == 0 {
+			t.Error("failed to find enemy snakes")
+		}
+	}
+}
+
+func TestLargerSnakesNearMyHead(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		Head:   Coord{X: 5, Y: 5},
+		Body:   []Coord{{X: 5, Y: 5}, {X: 4, Y: 5}, {X: 4, Y: 4}, {X: 5, Y: 4}, {X: 6, Y: 4}, {X: 6, Y: 5}},
+		Length: 3,
+		ID:     "34252345-23452345",
+	}
+	enemy1 := Battlesnake{
+		Head:   Coord{X: 7, Y: 5},
+		Body:   []Coord{{X: 7, Y: 5}, {X: 7, Y: 6}, {X: 7, Y: 8}},
+		Length: 3,
+		ID:     "4326-6456456",
+	}
+
+	state := GameState{
+		Board: Board{
+			Width:   11,
+			Height:  11,
+			Food:    []Coord{{}},
+			Snakes:  []Battlesnake{me, enemy1},
+			Hazards: []Coord{{}},
+		},
+		You: me,
+	}
+	largerSnakesNearMyHead := map[string]bool{
+		"up":    false,
+		"down":  false,
+		"left":  false,
+		"right": false,
+	}
+
+	for i := 0; i < 100; i++ {
+		largerSnakesNearMyHead := CheckIfLargerSnakesNearMyHead(FindEnemySnakes(state), state, largerSnakesNearMyHead)
+		fmt.Println("Larger snakes near my head: ", largerSnakesNearMyHead)
+		nextMove := move(state)
+		// Should NOT move right toward larger snake!
+		if nextMove.Move == "right" {
+			t.Errorf("snake moved %s toward larger snake", nextMove.Move)
+		}
+	}
+}
+
+func TestSmallerSnakesNearMyHead(t *testing.T) {
+	// Arrange
+	me := Battlesnake{
+		Head:   Coord{X: 5, Y: 5},
+		Body:   []Coord{{X: 5, Y: 5}, {X: 4, Y: 5}, {X: 4, Y: 4}, {X: 5, Y: 4}, {X: 6, Y: 4}, {X: 6, Y: 5}},
+		Length: 6,
+		ID:     "34252345-23452345",
+	}
+	enemy1 := Battlesnake{
+		Head:   Coord{X: 7, Y: 5},
+		Body:   []Coord{{X: 7, Y: 5}, {X: 7, Y: 6}, {X: 7, Y: 8}},
+		Length: 3,
+		ID:     "4326-6456456",
+	}
+
+	state := GameState{
+		Board: Board{
+			Width:   11,
+			Height:  11,
+			Food:    []Coord{{}},
+			Snakes:  []Battlesnake{me, enemy1},
+			Hazards: []Coord{{}},
+		},
+		You: me,
+	}
+	smallerSnakesNearMyHead := map[string]bool{
+		"up":    false,
+		"down":  false,
+		"left":  false,
+		"right": false,
+	}
+
+	for i := 0; i < 100; i++ {
+		smallerSnakesNearMyHead := CheckIfSmallerSnakesNearMyHead(FindEnemySnakes(state), state, smallerSnakesNearMyHead)
+		fmt.Println("Smaller snakes near my head: ", smallerSnakesNearMyHead)
 	}
 }
 

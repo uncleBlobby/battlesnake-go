@@ -6,7 +6,6 @@ package main
 // from the list of possible moves!
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -72,10 +71,32 @@ func move(state GameState) BattlesnakeMoveResponse {
 		"right": 0,
 	}
 
+	largerSnakesNearMyHead := map[string]bool{
+		"up":    false,
+		"down":  false,
+		"left":  false,
+		"right": false,
+	}
+
+	smallerSnakesNearMyHead := map[string]bool{
+		"up":    false,
+		"down":  false,
+		"left":  false,
+		"right": false,
+	}
+
 	lookDistance = DetermineOpenSpaces(state, lookDistance)
-	fmt.Println("Look Distance: ", lookDistance)
+	//fmt.Println("Look Distance: ", lookDistance)
 	var largestLookDirection = ReturnLargestLookDistanceDirection(lookDistance)
-	fmt.Println("Largest Look Distance: ", largestLookDirection)
+	//fmt.Println("Largest Look Distance: ", largestLookDirection)
+
+	enemySnakes := FindEnemySnakes(state)
+	//fmt.Println("Enemy Snakes: ", enemySnakes)
+
+	largerSnakesNearMyHead = CheckIfLargerSnakesNearMyHead(enemySnakes, state, largerSnakesNearMyHead)
+	smallerSnakesNearMyHead = CheckIfSmallerSnakesNearMyHead(enemySnakes, state, smallerSnakesNearMyHead)
+
+	//fmt.Println("Larger Snakes near my head: ", largerSnakesNearMyHead)
 
 	// Step 0: Don't let your Battlesnake move back in on it's own neck
 	possibleMoves = AvoidMyNeck(state, possibleMoves)
@@ -121,6 +142,32 @@ func move(state GameState) BattlesnakeMoveResponse {
 	for move, isSafe := range possibleMoves {
 		if isSafe {
 			safeMoves = append(safeMoves, move)
+		}
+	}
+
+	towardLargerSnakeMoves := []string{}
+	for move, isTowardLarger := range largerSnakesNearMyHead {
+		if isTowardLarger {
+			towardLargerSnakeMoves = append(towardLargerSnakeMoves, move)
+		}
+	}
+
+	towardSmallerSnakeMoves := []string{}
+	for move, isTowardSmaller := range smallerSnakesNearMyHead {
+		if isTowardSmaller {
+			towardSmallerSnakeMoves = append(towardSmallerSnakeMoves, move)
+		}
+	}
+
+	// remove towardLargerSnakeMoves from safeMoves if possible
+
+	if len(safeMoves) > len(towardLargerSnakeMoves) {
+		for i := 0; i < len(towardLargerSnakeMoves); i++ {
+			for j := 0; j < len(safeMoves); j++ {
+				if safeMoves[j] == towardLargerSnakeMoves[i] {
+					safeMoves = append(safeMoves[:j], safeMoves[j+1:]...)
+				}
+			}
 		}
 	}
 

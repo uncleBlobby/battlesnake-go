@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sort"
 )
 
@@ -65,11 +64,11 @@ func DetermineOpenSpaces(state GameState, lookDistance map[string]int) map[strin
 	}
 
 	sort.Sort(p)
-
-	for _, k := range p {
-		fmt.Printf("%v\t%v\n", k.Key, k.Value)
-	}
-
+	/*
+		for _, k := range p {
+			//fmt.Printf("%v\t%v\n", k.Key, k.Value)
+		}
+	*/
 	return lookDistance
 }
 
@@ -82,11 +81,11 @@ func ReturnLargestLookDistanceDirection(lookDistance map[string]int) string {
 	}
 
 	sort.Sort(p)
-
-	for _, k := range p {
-		fmt.Printf("%v\t%v\n", k.Key, k.Value)
-	}
-
+	/*
+		for _, k := range p {
+			//fmt.Printf("%v\t%v\n", k.Key, k.Value)
+		}
+	*/
 	return p[3].Key
 }
 
